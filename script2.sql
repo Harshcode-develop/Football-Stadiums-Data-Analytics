@@ -15,6 +15,14 @@ FROM stadiums
 GROUP BY country
 ORDER BY stadium_count desc, country asc
 
+
+-- stadiums with capacity above avg
+SELECT stadium, t2.region, capacity, avg_capacity
+FROM stadiums, (SELECT region, AVG(capacity) avg_capacity FROM stadiums GROUP BY region) t2
+WHERE t2.region = stadiums.region
+and capacity > avg_capacity
+ORDER BY region
+
 -- stadium rank within each region
 SELECT rank, stadium, region,
     RANK() OVER(PARTITION BY region ORDER BY capacity DESC) as region_rank
@@ -28,13 +36,6 @@ FROM (
     FROM stadiums
 ) ranked_stadiums
 WHERE region_rank <= 3;
-
--- stadiums with capacity above avg
-SELECT stadium, t2.region, capacity, avg_capacity
-FROM stadiums, (SELECT region, AVG(capacity) avg_capacity FROM stadiums GROUP BY region) t2
-WHERE t2.region = stadiums.region
-and capacity > avg_capacity
-ORDER BY region
 
 --stadiums with the closest capacity to regional median
 WITH MedianCTE AS (
